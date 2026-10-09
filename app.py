@@ -16,7 +16,9 @@ from werkzeug.security import check_password_hash, generate_password_hash
 load_dotenv()
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///dev.db")
-app.config["JWT_SECRET_KEY"] = os.environ["JWT_SECRET_KEY"]  # required, set in .env
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
+if not app.config["JWT_SECRET_KEY"]:
+    raise RuntimeError("JWT_SECRET_KEY environment variable is not set")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=12)
 CORS(app, origins=os.getenv("CORS_ORIGINS", "http://localhost:5500").split(","))
 db = SQLAlchemy(app)
@@ -666,4 +668,10 @@ def create_admin():
 
 
 if __name__ == "__main__":
-    app.run(debug=os.getenv("FLASK_DEBUG") == "1")
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
+
+    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
+import os
+if not app.config["JWT_SECRET_KEY"]:
+    raise RuntimeError("JWT_SECRET_KEY environment variable is not set")
